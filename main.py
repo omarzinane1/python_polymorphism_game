@@ -10,25 +10,69 @@ root.title("🏜️ Desert Runner - Omar Edition")
 root.geometry("1000x500")
 root.resizable(False, False)
 
-# === Canvas ===
 canvas = tk.Canvas(root, width=1000, height=500, highlightthickness=0)
 canvas.pack()
 
-# === Images ===
+# === FONCTION : DESSIN DU BACKGROUND ===
+def draw_background():
+    # Dégradé du ciel
+    for i in range(100):
+        color = f"#%02x%02x%02x" % (255 - i, 200 - i, 100 + i)
+        y = int(i * 5)
+        canvas.create_rectangle(0, y, 1000, y + 5, outline=color, fill=color)
+
+    # Dunes (formes arrondies)
+    canvas.create_polygon(0, 350, 200, 300, 400, 350, 700, 320, 1000, 350, 1000, 500, 0, 500,
+                          fill="#f4a65a", outline="")
+    canvas.create_polygon(0, 370, 250, 340, 500, 380, 800, 360, 1000, 380, 1000, 500, 0, 500,
+                          fill="#e39243", outline="")
+
+    # Sol
+    canvas.create_rectangle(0, 400, 1000, 500, fill="#c16a3d", outline="")
+
+# === NUAGES ===
+clouds = []
+def create_cloud(x, y, scale=1.0):
+    parts = [(-70, 0, 0, 40), (-40, -18, 40, 36), (10, -8, 80, 44), (50, -20, 120, 36)]
+    cloud_parts = []
+    for (lx, ly, rx, ry) in parts:
+        cid = canvas.create_oval(x + lx*scale, y + ly*scale,
+                                 x + rx*scale, y + ry*scale,
+                                 outline='', fill='white')
+        cloud_parts.append(cid)
+    clouds.append(cloud_parts)
+
+def move_clouds():
+    for parts in clouds:
+        for cid in parts:
+            canvas.move(cid, -0.8, 0)
+        x1, _, x2, _ = canvas.bbox(parts[0])
+        # Quand un nuage sort de l'écran, le replacer à droite
+        if x2 < 0:
+            for cid in parts:
+                canvas.move(cid, 1200, random.randint(-20, 20))
+    root.after(50, move_clouds)
+
+# === DESSIN DU BACKGROUND ===
+draw_background()
+for i in range(4):
+    create_cloud(random.randint(0, 1000), random.randint(50, 200), scale=random.uniform(0.8, 1.3))
+move_clouds()
+
+# === Chargement images pour le reste du jeu ===
 def load_image(path, size=None):
     img = Image.open(path)
     if size:
         img = img.resize(size, Image.LANCZOS)
     return ImageTk.PhotoImage(img)
 
-background_img = load_image("assets/background2.png")
-player_img = load_image("assets/player2.png", (70, 70))
+player_img = load_image("assets/rock.png", (70, 70))
 cactus_img = load_image("assets/cactus.png", (90, 100))
 rock_img = load_image("assets/rock.png", (90, 100))
 bird_img = load_image("assets/bird.png", (50, 50))
 special_img = load_image("assets/special.png", (100,120))
 
-# === Variables ===
+# === VARIABLES ===
 player_x = 880
 player_y = 350
 player = None
@@ -38,10 +82,7 @@ health_bar = None
 game_running = False
 obstacles = []
 
-# === Fond ===
-canvas.create_image(0, 0, image=background_img, anchor="nw")
-
-# === Fonctions ===
+# === FONCTIONS ===
 def jump():
     if player:
         player.jump()
@@ -70,7 +111,7 @@ def create_obstacle():
 def create_flying_obstacle():
     if not game_running:
         return
-    if random.random() < 0.7:
+    if random.random() < 0.10:
         obs = Flying(canvas, -50, random.randint(150,250), bird_img)
         obstacles.append(obs)
     if random.random() < 0.05:
@@ -111,7 +152,7 @@ def update_player():
     player.update()
     root.after(20, update_player)
 
-# === Démarrage et boutons ===
+# === DÉMARRAGE ===
 def countdown(n):
     if n>0:
         canvas.delete("countdown")
@@ -145,7 +186,9 @@ def game_over():
     global game_running
     game_running = False
     canvas.delete("all")
-    canvas.create_image(0,0,image=background_img, anchor="nw")
+    draw_background()
+    for i in range(3):
+        create_cloud(random.randint(0,1000), random.randint(50,200))
     canvas.create_rectangle(0,0,1000,500,fill="#000",stipple="gray50")
     canvas.create_text(500,150,text="💀 GAME OVER 💀", font=("Impact",48,"bold"), fill="#FF3333")
     canvas.create_text(500,220,text=f"Your Score: {score}", font=("Arial",28,"bold"), fill="#FFD700")
@@ -158,7 +201,7 @@ def game_win():
     global game_running
     game_running = False
     canvas.delete("all")
-    canvas.create_image(0,0,image=background_img, anchor="nw")
+    draw_background()
     canvas.create_rectangle(0,0,1000,500,fill="#000",stipple="gray50")
     canvas.create_text(500,150,text="🎉 YOU WIN! 🎉", font=("Impact",48,"bold"), fill="#00FF00")
     canvas.create_text(500,220,text=f"Your Score: {score}", font=("Arial",28,"bold"), fill="#FFD700")
@@ -169,14 +212,14 @@ def game_win():
 
 def retry_game():
     canvas.delete("all")
-    canvas.create_image(0,0,image=background_img, anchor="nw")
+    draw_background()
     global obstacles, player, score_text
     obstacles.clear()
     player = None
     score_text = None
     start_game_button()
 
-# --- Buttons ---
+# --- Boutons ---
 start_btn = tk.Button(root,text="START GAME", font=("Arial",20,"bold"), bg="#222", fg="white", command=start_game_button)
 start_btn.place(x=380,y=220)
 

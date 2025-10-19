@@ -11,7 +11,7 @@ class Player:
         self.velocity_y = 0
         self.gravity = 1.3   
         self.jump_force = -30  
-        self.min_y = 50          
+        self.min_y = 10          
         self.max_y = y      
 
     def jump(self):
