@@ -13,7 +13,7 @@ root.resizable(False, False)
 canvas = tk.Canvas(root, width=1000, height=500, highlightthickness=0)
 canvas.pack()
 
-# === FONCTION : DESSIN DU BACKGROUND ===
+# === FONCTION : BACKGROUND ===
 def draw_background():
     # Dégradé du ciel
     for i in range(100):
@@ -21,7 +21,7 @@ def draw_background():
         y = int(i * 5)
         canvas.create_rectangle(0, y, 1000, y + 5, outline=color, fill=color)
 
-    # Dunes (formes arrondies)
+    # Dunes
     canvas.create_polygon(0, 350, 200, 300, 400, 350, 700, 320, 1000, 350, 1000, 500, 0, 500,
                           fill="#f4a65a", outline="")
     canvas.create_polygon(0, 370, 250, 340, 500, 380, 800, 360, 1000, 380, 1000, 500, 0, 500,
@@ -45,9 +45,8 @@ def create_cloud(x, y, scale=1.0):
 def move_clouds():
     for parts in clouds:
         for cid in parts:
-            canvas.move(cid, -0.8, 0)
+            canvas.move(cid, -0.7, 0)
         x1, _, x2, _ = canvas.bbox(parts[0])
-        # Quand un nuage sort de l'écran, le replacer à droite
         if x2 < 0:
             for cid in parts:
                 canvas.move(cid, 1200, random.randint(-20, 20))
@@ -59,22 +58,22 @@ for i in range(4):
     create_cloud(random.randint(0, 1000), random.randint(50, 200), scale=random.uniform(0.8, 1.3))
 move_clouds()
 
-# === Chargement images pour le reste du jeu ===
+# === Chargement images ===
 def load_image(path, size=None):
     img = Image.open(path)
     if size:
         img = img.resize(size, Image.LANCZOS)
     return ImageTk.PhotoImage(img)
 
-player_img = load_image("assets/rock.png", (70, 70))
+player_img = load_image("assets/player2.png", (70, 70))
 cactus_img = load_image("assets/cactus.png", (90, 100))
-rock_img = load_image("assets/rock.png", (90, 100))
+rock_img = load_image("assets/rock.png", (100, 120))
 bird_img = load_image("assets/bird.png", (50, 50))
 special_img = load_image("assets/special.png", (100,120))
 
 # === VARIABLES ===
 player_x = 880
-player_y = 350
+player_y = 375  # position
 player = None
 score = 0
 score_text = None
@@ -103,7 +102,7 @@ def create_obstacle():
     if not game_running:
         return
     obs_class = random.choice([Cactus, Rock])
-    obs_img = cactus_img if obs_class==Cactus else rock_img
+    obs_img = cactus_img if obs_class == Cactus else rock_img
     obs = obs_class(canvas, -50, 360, obs_img)
     obstacles.append(obs)
     root.after(random.randint(1000,1600), create_obstacle)
