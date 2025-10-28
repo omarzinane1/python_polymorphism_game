@@ -6,7 +6,7 @@ from obstacle import Cactus, Rock, Flying, Special
 
 # === Fenêtre ===
 root = tk.Tk()
-root.title("🏜️ Desert Runner - Omar Edition")
+root.title("Desert Runner - Omar Edition")
 root.geometry("1000x500")
 root.resizable(False, False)
 
@@ -15,7 +15,7 @@ canvas.pack()
 
 # === FONCTION : BACKGROUND ===
 def draw_background():
-    # Dégradé du ciel
+    # ciel
     for i in range(100):
         color = f"#%02x%02x%02x" % (255 - i, 200 - i, 100 + i)
         y = int(i * 5)
@@ -65,7 +65,7 @@ def load_image(path, size=None):
         img = img.resize(size, Image.LANCZOS)
     return ImageTk.PhotoImage(img)
 
-player_img = load_image("assets/player2.png", (70, 70))
+player_img = load_image("assets/player2.png", (90, 90))
 cactus_img = load_image("assets/cactus.png", (90, 100))
 rock_img = load_image("assets/rock.png", (100, 120))
 bird_img = load_image("assets/bird.png", (50, 50))
@@ -90,13 +90,19 @@ def update_health_bar():
     global health_bar
     if health_bar:
         canvas.delete(health_bar)
+    if player.health > 50:
+        color = "green"
+    elif player.health > 20:
+        color = "orange"
+    else:
+        color = "red"
     health_bar = canvas.create_rectangle(player_x-45, player_y-80,
-                                         player_x-45 + (player.health/100)*90, player_y-70, fill="green")
+                                         player_x-45 + (player.health/100)*90, player_y-70, fill=color)
 
 def check_collision(a, b):
     x1, y1 = a.coords()
     x2, y2 = b.coords()
-    return abs(x1 - x2) < 45 and abs(y1 - y2) < 45
+    return abs(x1 - x2) < 45 and abs(y1 - y2) < 45 
 
 def create_obstacle():
     if not game_running:
@@ -140,7 +146,7 @@ def move_obstacles():
     if player.health <= 0:
         game_over()
         return
-    if score >= 100:
+    if score >= 10:
         game_win()
         return
     root.after(30, move_obstacles)
@@ -201,13 +207,23 @@ def game_win():
     game_running = False
     canvas.delete("all")
     draw_background()
-    canvas.create_rectangle(0,0,1000,500,fill="#000",stipple="gray50")
-    canvas.create_text(500,150,text="🎉 YOU WIN! 🎉", font=("Impact",48,"bold"), fill="#00FF00")
-    canvas.create_text(500,220,text=f"Your Score: {score}", font=("Arial",28,"bold"), fill="#FFD700")
-    retry_btn = tk.Button(root,text="Play Again", font=("Arial",16), bg="#0A0", fg="white", command=start_game_run)
-    exit_btn = tk.Button(root,text="Exit", font=("Arial",16), bg="#A00", fg="white", command=root.destroy)
-    canvas.create_window(400,320,window=retry_btn)
-    canvas.create_window(600,320,window=exit_btn)
+    canvas.create_rectangle(0, 0, 1000, 500, fill="#000", stipple="gray50")
+    canvas.create_text(500, 150, text="🎉 YOU WIN! 🎉", font=("Impact", 48, "bold"), fill="#00FF00")
+    canvas.create_text(500, 220, text=f"Your Score: {score}", font=("Arial", 28, "bold"), fill="#FFD700")
+
+    def restart_game():
+        canvas.delete("all")
+        retry_btn.destroy()
+        exit_btn.destroy()
+        draw_background()
+        start_game_run()
+
+    retry_btn = tk.Button(root, text="Play Again", font=("Arial", 16), bg="#0A0", fg="white", command=restart_game)
+    exit_btn = tk.Button(root, text="Exit", font=("Arial", 16), bg="#A00", fg="white", command=root.destroy)
+
+    canvas.create_window(400, 320, window=retry_btn)
+    canvas.create_window(600, 320, window=exit_btn)
+
 
 def retry_game():
     canvas.delete("all")

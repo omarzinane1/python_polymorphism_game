@@ -1,6 +1,8 @@
+# obstacle.py
 import random
+from interfaces import IDrawable, IMovable
 
-class Obstacle:
+class Obstacle(IDrawable, IMovable):
     def __init__(self, canvas, x, y, image, damage=10):
         self.canvas = canvas
         self.id = canvas.create_image(x, y, image=image)
@@ -20,38 +22,23 @@ class Obstacle:
     def delete(self):
         self.canvas.delete(self.id)
 
-
+# --- Sous-classes ---
 class Cactus(Obstacle):
-    def __init__(self, canvas, x, y, image):
-        super().__init__(canvas, x, y, image, damage=10)
-
     def affect_player(self, player):
         if not player.invincible:
             player.health -= self.damage
-
 
 class Rock(Obstacle):
-    def __init__(self, canvas, x, y, image):
-        super().__init__(canvas, x, y, image, damage=5)
-
     def affect_player(self, player):
         if not player.invincible:
             player.health -= self.damage
-
 
 class Flying(Obstacle):
-    def __init__(self, canvas, x, y, image):
-        super().__init__(canvas, x, y, image, damage=5)
-
     def affect_player(self, player):
         if not player.invincible:
             player.health -= self.damage
 
-
 class Special(Obstacle):
-    def __init__(self, canvas, x, y, image):
-        super().__init__(canvas, x, y, image, damage=50)
-
     def affect_player(self, player):
         if not player.invincible:
             player.health -= self.damage
