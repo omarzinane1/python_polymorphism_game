@@ -52,8 +52,8 @@ class Player(IDrawable, IMovable):
                     self.jump_count = 0
                     break
 
+# implémentation
     def move(self):
-        """Obligatoire selon IMovable, mais ici on ne bouge que sur Y (update)."""
         self.update()
 
     def coords(self):

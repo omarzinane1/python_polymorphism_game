@@ -1,4 +1,3 @@
-# obstacle.py
 import random
 from interfaces import IDrawable, IMovable
 
